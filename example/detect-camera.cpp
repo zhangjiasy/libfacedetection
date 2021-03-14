@@ -40,6 +40,10 @@ the use of this software, even if advised of the possibility of such damage.
 #include <opencv2/opencv.hpp>
 #include "facedetectcnn.h"
 
+#ifdef _DEBUG
+#include "vld.h"
+#endif
+
 //define the buffer size. Do not change the size!
 #define DETECT_BUFFER_SIZE 0x20000
 using namespace cv;
@@ -62,7 +66,6 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-
     VideoCapture cap;
     Mat im;
     
@@ -78,10 +81,19 @@ int main(int argc, char* argv[])
 
     if( cap.isOpened())
     {
+		bool rslt;
+		rslt = cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+		rslt = cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+		rslt = cap.set(CV_CAP_PROP_FPS, 30);
+
         while(true)
         {
             cap >> im;
-            //cout << "Image size: " << im.rows << "X" << im.cols << endl;
+
+			if (im.empty())
+				continue;
+
+            cout << "Image size: " << im.rows << "X" << im.cols << endl;
             Mat image = im.clone();
 
             ///////////////////////////////////////////
@@ -132,13 +144,10 @@ int main(int argc, char* argv[])
             }
             imshow("result", result_image);
             
-            if((cv::waitKey(2)& 0xFF) == 'q')
+            if((cv::waitKey(1)& 0xFF) == 'q')
                 break;
         }
     }
-   
-	
-
 
     //release the buffer
     free(pBuffer);
